@@ -6,9 +6,34 @@ postal-ballot return rules, across three national elections.
 
 15 questions x 2 frontier models = 30 cached answers, graded by an LLM judge.
 
-**The code and the full write-up are available on request.** Open an issue, or reach
-me at [maramasaeva.com](https://maramasaeva.com) or [@rssmrm](https://x.com/rssmrm),
-and I'll share the repo.
+## What's in this repo
+
+| Path | What |
+|---|---|
+| `data/questions.jsonl`, `data/ground-truth.csv` | the 15 questions and their verified reference facts |
+| `results/answers.jsonl` | the 30 cached model answers, so nothing needs to be re-queried |
+| `results/scores.json` | the baseline run quoted below (gpt-4o-mini judge, temperature 0) |
+| `build.py` | validates the dataset, no API key needed |
+| `score.py` | the original judge, unchanged |
+| `score_v2.py` | the rebuilt scorer, side by side with `score.py` |
+
+The dataset, cached answers and `score.py` come from the VotingFacts work-sample
+starter. `score_v2.py` is my rework.
+
+```bash
+uv run build.py                    # validate the dataset
+uv run score.py                    # original judge -> results/scores.json (needs an API key)
+uv run score_v2.py --selftest      # pure functions, no API key
+```
+
+`score_v2.py` is not finished. The `claims` lists in the dataset, the official-domain
+allowlist and the rule for turning claim statuses into an item verdict are category
+definitions I have not written yet, so it refuses to score the data and no v2 number
+exists. Its selftest passes. Running `score.py` again overwrites
+`results/scores.json`.
+
+The full write-up is available on request. Open an issue, or reach me at
+[maramasaeva.com](https://maramasaeva.com) or [@rssmrm](https://x.com/rssmrm).
 
 ---
 
@@ -52,7 +77,8 @@ sanity checks. All 6 of their answers are correct. They are 20% of the denominat
 ## What was rebuilt
 
 A second scorer alongside the original, so the two can be diffed and re-run against
-each other rather than one replacing the other.
+each other rather than one replacing the other. This is the design as implemented in
+`score_v2.py`; see above for what is still unwritten before it can run.
 
 - **Blinded judge.** The expected failure, the model name and the item id are no
   longer in the prompt.
